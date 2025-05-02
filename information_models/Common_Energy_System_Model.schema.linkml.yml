@@ -1,0 +1,21 @@
+name: Common-Energy-System-Model
+description: |-
+  documentation
+title: Common Energy System Model
+id: http://data.globalpst.org/Common-Energy-System-Model//Common-Energy-System-Model
+license: https://www.apache.org/licenses/LICENSE-2.0.txt
+imports:
+- linkml:types
+prefixes:
+  linkml: https://w3id.org/linkml/
+  cim: https://cim.ucaiug.io/ns#
+  dcat: http://www.w3.org/ns/dcat#
+  dct: http://purl.org/dc/terms/
+  github: https://github.com/
+  liander: http://data.liander.nl/markt/def#
+  nbnl: https://begrippen.netbeheernederland.nl/energiesysteembeheer/nl/page/
+  nl: http://iec.ch/TC57/CIM100-Netherlands#
+  owl: http://www.w3.org/2002/07/owl#
+  skos: http://www.w3.org/2004/02/skos/core#
+  this: http://data.globalpst.org/Common-Energy-System-Model//Common-Energy-System-Model/def#
+classes: {}

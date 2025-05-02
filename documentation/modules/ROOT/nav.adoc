@@ -1,0 +1,1 @@
+* xref:Common-Energy-System-Model::design.adoc[]
