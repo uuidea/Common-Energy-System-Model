@@ -1,0 +1,75 @@
+name: Common-Energy-System-Model
+description: |-
+  documentation
+title: Common Energy System Model
+id: http://data.globalpst.org/Common-Energy-System-Model//Common-Energy-System-Model
+license: https://www.apache.org/licenses/LICENSE-2.0.txt
+imports:
+- linkml:types
+prefixes:
+  linkml: https://w3id.org/linkml/
+  cim: https://cim.ucaiug.io/ns#
+  dcat: http://www.w3.org/ns/dcat#
+  dct: http://purl.org/dc/terms/
+  github: https://github.com/
+  liander: http://data.liander.nl/markt/def#
+  nbnl: https://begrippen.netbeheernederland.nl/energiesysteembeheer/nl/page/
+  nl: http://iec.ch/TC57/CIM100-Netherlands#
+  owl: http://www.w3.org/2002/07/owl#
+  skos: http://www.w3.org/2004/02/skos/core#
+  ex: http://www.example.com#
+  this: https://data.globalpst.org/Common-Energy-System-Model//Common-Energy-System-Model/def#
+
+
+
+classes: 
+  ExampleClass:
+    class_uri: ex:ExampleClass
+    description:
+      "this is the definition of the ExampleClass"
+    slots:
+     - identifier
+     - exampleAtribute
+     - exampleAssociation  
+     - exampleEnumProperty
+  OtherClass: 
+    description:
+      "this is the definition of the ExampleClass"
+
+
+
+slots: 
+  identifier:
+    slot_uri: dct:identifier
+    description:
+     "the name of a thing"
+    identifier: true
+    range: String
+
+  exampleAtribute:
+    description:
+      "the definition of this example attribute"
+    slot_uri: ex:exampleAtribute
+    range: string 
+    
+  exampleAssociation:
+    description:
+      "the definition of this example attribute"
+    slot_uri: ex:exampleAssociation
+    range: OtherClass 
+
+  exampleEnumProperty:
+    description:
+      "the definition of this example attribute that has an enum as a type"
+    slot_uri: ex:exampleAssociation
+    range: ExampleEnum  
+
+
+
+enums:
+  ExampleEnum:
+    enum_uri: ex:ExampleEnum
+    permissible_values:
+      value1: {}
+      value2: {}
+      value3: {}

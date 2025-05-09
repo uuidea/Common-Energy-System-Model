@@ -3,8 +3,6 @@
 set shell := ["bash", "-uc"]
 set windows-shell := ["bash", "-uc"]
 
-
-
 ref_name := "git rev-parse --abbrev-ref HEAD"
 major_branch_name := "git rev-parse --abbrev-ref HEAD | cut -d . -f 1"
 
@@ -23,6 +21,9 @@ build: clean _post-process-linkml-schema generate-json-schema generate-documenta
     @echo "… OK."
     @echo
     @echo "All project artifacts have been generated and post-processed, and can found in: artifacts/"
+    @echo
+    antora antora-playbook.yml
+    @echo "Website has been built at: docs/"
     @echo
 
 # Clean up the output directory
@@ -50,14 +51,14 @@ initialize:
     echo "Creating and configuring repository on GitHub…"
     echo
 
-    gh repo create uuidea/Common-Energy-System-Model \
-        --description "documentation" \
+    gh repo create bartkl/edsn-linkml-poc \
+        --description "Information models for the Meetdata data product." \
         --public \
         --disable-wiki
 
     git init -b main
 
-    git remote add origin git@github.com:uuidea/Common-Energy-System-Model.git
+    git remote add origin git@github.com:bartkl/edsn-linkml-poc.git
     git fetch
 
     git add .
@@ -87,7 +88,7 @@ initialize:
     git checkout -b v0
     git push -u origin v0
 
-    gh repo edit uuidea/Common-Energy-System-Model --default-branch v0
+    gh repo edit bartkl/edsn-linkml-poc --default-branch v0
     git branch -D main
     git push --delete origin main
 
@@ -100,7 +101,7 @@ initialize:
     #    --method POST \
     #    -H "Accept: application/vnd.github+json" \
     #    -H "X-GitHub-Api-Version: 2022-11-28" \
-    #    /repos/uuidea/$(basename `git config --get remote.origin.url` | cut -d . -f -1)/rulesets \
+    #    /repos/bartkl/$(basename `git config --get remote.origin.url` | cut -d . -f -1)/rulesets \
     #    --input ".github/rulesets/protect-docs-branches.json"
     #@echo "… OK."
     #@echo
@@ -112,7 +113,7 @@ initialize:
         --method POST \
         -H "Accept: application/vnd.github+json" \
         -H "X-GitHub-Api-Version: 2022-11-28" \
-        /repos/uuidea/$(basename `git config --get remote.origin.url` | cut -d . -f -1)/rulesets \
+        /repos/bartkl/$(basename `git config --get remote.origin.url` | cut -d . -f -1)/rulesets \
         --input ".github/rulesets/protect-major-branches.json"
 
     # Set workflow permissions
@@ -121,12 +122,12 @@ initialize:
     #  --method PUT \
     #  -H "Accept: application/vnd.github+json" \
     #  -H "X-GitHub-Api-Version: 2022-11-28" \
-    #  /repos/uuidea/Common-Energy-System-Model/actions/permissions \
+    #  /repos/bartkl/edsn-linkml-poc/actions/permissions \
     #   -F "enabled=true" -f "allowed_actions=all"
 
     echo "… OK."
     echo
-    echo "A GitHub repository has been created and configured at: https://github.com/uuidea/Common-Energy-System-Model"
+    echo "A GitHub repository has been created and configured at: https://github.com/bartkl/edsn-linkml-poc"
     echo
 
 
@@ -135,15 +136,15 @@ _post-process-linkml-schema:
     @echo "Copying source files to artifacts directory…"
     @echo
     mkdir -p "artifacts/information_models"
-    cp "information_models/Common_Energy_System_Model.schema.linkml.yml" "artifacts/information_models/"
+    cp "information_models/schema.linkml.yml" "artifacts/information_models/"
     @echo
     @echo "Setting version in LinkML schema…"
     @echo
-    sed -i '/^version: .*$/d' "artifacts/information_models/Common_Energy_System_Model.schema.linkml.yml"
+    sed -i '/^version: .*$/d' "artifacts/information_models/schema.linkml.yml"
     @if [ -z ${VERSION:-} ]; then \
-        sed -i "/^name: .*$/a version: {{shell(ref_name)}}" "artifacts/information_models/Common_Energy_System_Model.schema.linkml.yml"; \
+        sed -i "/^name: .*$/a version: {{shell(ref_name)}}" "artifacts/information_models/schema.linkml.yml"; \
     else \
-        sed -i "/^name: .*$/a version: ${VERSION}" "artifacts/information_models/Common_Energy_System_Model.schema.linkml.yml"; \
+        sed -i "/^name: .*$/a version: ${VERSION}" "artifacts/information_models/schema.linkml.yml"; \
     fi
     @echo "… OK."
     @echo
@@ -151,17 +152,17 @@ _post-process-linkml-schema:
 # Edit the schema
 [group("schema")]
 edit-schema:
-    @${VISUAL:-${EDITOR:-nano}} information_models/Common_Energy_System_Model.schema.linkml.yml
+    @${VISUAL:-${EDITOR:-nano}} information_models/schema.linkml.yml
 
 # Show definition of the class identified by the provided CURIE
 [group("schema")]
 get-definition curie:
-    yq '.classes.* | select(.class_uri == "{{curie}}")' information_models/Common_Energy_System_Model.schema.linkml.yml
+    yq '.classes.* | select(.class_uri == "{{curie}}")' information_models/schema.linkml.yml
 
 # List all classes in the schema
 [group("schema")]
 list-classes:
-    yq '.classes.* | key' information_models/Common_Energy_System_Model.schema.linkml.yml
+    yq '.classes.* | key' information_models/schema.linkml.yml
 
 # Create new draft
 [group("version-control")]
@@ -176,7 +177,7 @@ create-draft name:
     @echo
     @echo "Creating new draft pull request…"
     @echo
-    gh pr create --base {{shell(major_branch_name)}} --draft
+    gh pr create --base {{shell(major_branch_name)}} --draft --editor
     @echo "… OK."
     @echo
 
@@ -243,8 +244,8 @@ generate-documentation: _post-process-linkml-schema
     @echo
     cp -r "documentation" "artifacts"
     mkdir -p "artifacts/documentation/modules/schema"
-    poetry run python -m linkml_asciidoc_generator.main \
-        "artifacts/information_models/Common_Energy_System_Model.schema.linkml.yml" \
+    python -m linkml_asciidoc_generator.main \
+        "artifacts/information_models/schema.linkml.yml" \
         "artifacts/documentation/modules/schema"
     echo "- modules/schema/nav.adoc" >> artifacts/documentation/antora.yml
     @echo "… OK."
@@ -260,7 +261,7 @@ generate-example-data: _post-process-linkml-schema
     mkdir -p "artifacts/examples"
     for example_file in examples/*.yml; do \
         [ -f "$example_file" ] || continue; \
-        poetry run gen-linkml-profile  \
+        gen-linkml-profile  \
             convert \
             "$example_file" \
             --out "artifacts/${example_file%.*}.json"; \
@@ -276,13 +277,13 @@ generate-json-schema: _post-process-linkml-schema
     @echo "Generating JSON Schema…"
     @echo
     mkdir -p "artifacts/schemas/json_schema"
-    poetry run gen-json-schema \
+    gen-json-schema \
         --not-closed \
-        "artifacts/information_models/Common_Energy_System_Model.schema.linkml.yml" \
-        > "artifacts/schemas/json_schema/Common_Energy_System_Model.json_schema.json"
+        "artifacts/information_models/schema.linkml.yml" \
+        > "artifacts/schemas/json_schema/json_schema.json"
     @echo "… OK."
     @echo
-    @echo "Generated JSON Schema at: artifacts/schemas/json_schema/Common_Energy_System_Model.json_schema.json"
+    @echo "Generated JSON Schema at: artifacts/schemas/json_schema/json_schema.json"
     @echo
 
 # Validate example data
@@ -292,8 +293,15 @@ validate-example-data: generate-json-schema generate-example-data
     @echo
     for example_file in artifacts/examples/*.json; do \
         [ -f "$example_file" ] || continue; \
-        poetry run check-jsonschema --schemafile "artifacts/schemas/json_schema/Common_Energy_System_Model.json_schema.json" $example_file; \
+        check-jsonschema --schemafile "artifacts/schemas/json_schema/json_schema.json" $example_file; \
     done
     @echo "… OK."
     @echo
 
+# Serve website
+[group("project")]
+serve-documentation:
+    @echo "Building project…"
+    @echo
+    http-serve docs/
+    @echo
